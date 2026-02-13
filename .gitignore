@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Next.js build
+Frontend/.next/
+Frontend/out/
+
+# Environment
+.env
+Frontend/.env.local
+Backend/.env
+
+# OS
+nul
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code local
+.claude/
+.mcp.json
+
+# Python
+*.egg-info/
+dist/
+build/
+
+# Misc
+*.log
