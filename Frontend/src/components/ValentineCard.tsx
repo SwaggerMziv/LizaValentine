@@ -13,12 +13,28 @@ import {
 
 const PixelSnow = dynamic(() => import("@/components/PixelSnow"), { ssr: false });
 
-type Phase = "envelope" | "card";
+type Phase = "envelope" | "fake" | "jk" | "envelope2" | "card";
 
 export function ValentineCard() {
   const [phase, setPhase] = useState<Phase>("envelope");
   const [showText, setShowText] = useState(false);
   const { play: playSound } = useSound();
+
+  // Fake phase → after 3.5s show "jk" widget
+  useEffect(() => {
+    if (phase === "fake") {
+      const t = setTimeout(() => setPhase("jk"), 3500);
+      return () => clearTimeout(t);
+    }
+  }, [phase]);
+
+  // "jk" widget → after 2.5s show second envelope
+  useEffect(() => {
+    if (phase === "jk") {
+      const t = setTimeout(() => setPhase("envelope2"), 2500);
+      return () => clearTimeout(t);
+    }
+  }, [phase]);
 
   // Card opened — confetti + reveal text
   useEffect(() => {
@@ -46,32 +62,34 @@ export function ValentineCard() {
   return (
     <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
       {/* Pink pixel snow */}
-      <div className="fixed inset-0 z-10 pointer-events-none">
-        <PixelSnow
-          color="#ff00ae"
-          flakeSize={0.01}
-          minFlakeSize={1.25}
-          pixelResolution={200}
-          speed={1.25}
-          density={0.3}
-          direction={125}
-          brightness={1}
-          depthFade={8}
-          farPlane={20}
-          gamma={0.4545}
-          variant="square"
-        />
-      </div>
+      {(phase === "envelope" || phase === "envelope2" || phase === "card") && (
+        <div className="fixed inset-0 z-10 pointer-events-none">
+          <PixelSnow
+            color="#ff00ae"
+            flakeSize={0.01}
+            minFlakeSize={1.25}
+            pixelResolution={200}
+            speed={1.25}
+            density={0.3}
+            direction={125}
+            brightness={1}
+            depthFade={8}
+            farPlane={20}
+            gamma={0.4545}
+            variant="square"
+          />
+        </div>
+      )}
 
       <AnimatePresence mode="wait">
-        {/* Envelope — opens directly to card */}
+        {/* First envelope — opens to fake */}
         {phase === "envelope" && (
           <motion.div
             key="envelope"
             className="cursor-pointer relative z-20"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => { playSound("open"); setPhase("card"); }}
+            onClick={() => { playSound("click"); setPhase("fake"); }}
             exit={{ opacity: 0, scale: 0.8 }}
           >
             <motion.div
@@ -82,6 +100,74 @@ export function ValentineCard() {
               <div className="text-8xl">💌</div>
               <p className="font-mono text-sm text-[hsl(var(--muted-foreground))] animate-pulse">
                 Нажми чтобы открыть...
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Fake troll message */}
+        {phase === "fake" && (
+          <motion.div
+            key="fake"
+            initial={{ scale: 0, rotate: 5 }}
+            animate={{ scale: 1, rotate: 0 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ type: "spring", damping: 12 }}
+            className="text-center space-y-4 max-w-sm relative z-20"
+          >
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 10, 0] }}
+              transition={{ repeat: Infinity, duration: 1.2 }}
+              className="text-7xl"
+            >
+              😂
+            </motion.div>
+            <h2 className="text-2xl font-mono font-bold text-[hsl(var(--foreground))]">
+              Ты правда думала что здесь что-то будет?
+            </h2>
+            <p className="text-xl font-mono text-[hsl(var(--muted-foreground))]">
+              Ахахахах
+            </p>
+          </motion.div>
+        )}
+
+        {/* "Just kidding" widget */}
+        {phase === "jk" && (
+          <motion.div
+            key="jk"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ type: "spring", damping: 15 }}
+            className="text-center space-y-3 relative z-20"
+          >
+            <div className="text-6xl">😏</div>
+            <p className="text-xl font-mono text-neon-pink font-bold">
+              Да ладно, я шучу
+            </p>
+          </motion.div>
+        )}
+
+        {/* Second envelope — real one */}
+        {phase === "envelope2" && (
+          <motion.div
+            key="envelope2"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="cursor-pointer relative z-20"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => { playSound("open"); setPhase("card"); }}
+          >
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="text-center space-y-4"
+            >
+              <div className="text-8xl">💌</div>
+              <p className="font-mono text-sm text-[hsl(var(--muted-foreground))] animate-pulse">
+                Теперь нажми чтобы ТОЧНО открыть...
               </p>
             </motion.div>
           </motion.div>

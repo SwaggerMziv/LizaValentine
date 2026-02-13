@@ -352,14 +352,6 @@ export function FakeError({ sessionId, initialPhase, challengeStatus, onContinue
               Примерное время: {formatTime(loadingTimer)}
             </p>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs opacity-40 hover:opacity-100"
-              onClick={() => changePhase("challenge")}
-            >
-              [DEBUG] Пропустить
-            </Button>
           </motion.div>
         )}
 
